@@ -84,7 +84,11 @@ def load_fusion_checkpoint(model, checkpoint_path, from_meta=False):
         elif checkpoint_path.endswith(".pt"):
             try:
                 df = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
-                df = df['module'] if 'module' in df else df
+                if 'module' in df:
+                    df = df['module']
+                elif 'model' in df and isinstance(df['model'],dict) and not any (k.startswith(('video_model.','audio_model.')) for k in df.keys()):
+                    df = df['model']
+                # df = df['module'] if 'module' in df else df
             except Exception as e:
                 df = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
                 df = df['app']['model']

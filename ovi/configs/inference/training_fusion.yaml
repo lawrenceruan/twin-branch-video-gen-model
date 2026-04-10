@@ -1,0 +1,59 @@
+# ============================================================================
+# Training Configuration for Ovi Fusion Model (Joint Video + Audio Diffusion)
+# ============================================================================
+
+# Checkpoint and output directories
+ckpt_dir: ./ckpts                         # Directory containing pretrained VAEs, T5, and (optional) fusion checkpoint
+output_dir: ./training_outputs            # Directory for saving training outputs
+
+# Model variant: determines latent sizes, resolution, and duration
+# Options: "720x720_5s", "960x960_5s", "960x960_10s"
+model_name: "720x720_5s"
+
+# ---- Dataset ----
+dataset:
+  manifest_path: ./training_data/manifest.jsonl   # JSONL manifest of pre-encoded latents
+  max_samples: null                                # Limit samples (null = use all)
+
+# ---- Training Hyperparameters ----
+training:
+  batch_size: 1                      # Per-GPU batch size (keep small due to model size)
+  gradient_accumulation_steps: 8     # Effective batch = batch_size * grad_accum * num_gpus
+  learning_rate: 1.0e-5
+  weight_decay: 0.01
+  # max_steps: 100000
+  max_steps: 100
+  # warmup_steps: 1000
+  warmup_steps: 20
+  lr_scheduler: cosine               # "cosine" or "constant"
+  max_grad_norm: 1.0
+  seed: 42
+
+# ---- Flow Matching ----
+flow_matching:
+  shift: 5.0                         # Timestep shift (same as inference)
+  timestep_weighting: uniform        # "uniform", "logit_normal", or "mode"
+
+# ---- Model Settings ----
+model:
+  gradient_checkpointing: true       # Enable gradient checkpointing to save VRAM
+  finetune_mode: fusion_only               # "full" (all params), "fusion_only" (only cross-modal projections)
+  resume_from: null                  # Path to a training checkpoint to resume from
+  load_pretrained: true              # Whether to load the pretrained fusion checkpoint
+
+# ---- Mixed Precision ----
+mixed_precision: bf16                # "bf16" or "fp32"
+
+# ---- Training Mode ----
+mode: t2v                            # "t2v" (text-to-video+audio) or "i2v" (image-to-video+audio)
+
+# ---- Logging & Checkpointing ----
+logging:
+  log_every: 10                      # Log metrics every N steps
+  save_every: 1000                   # Save checkpoint every N steps
+  tensorboard_dir: ./training_outputs/tb_logs
+
+# ---- Loss Weights ----
+loss:
+  video_weight: 1.0
+  audio_weight: 1.0

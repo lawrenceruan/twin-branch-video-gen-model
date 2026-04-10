@@ -109,7 +109,22 @@ class OviFusionEngine:
         if not os.path.exists(checkpoint_path):
             raise RuntimeError(f"REQUIRED fusion checkpoint not found in {config.ckpt_dir}, please download...")
 
-        load_fusion_checkpoint(model, checkpoint_path=checkpoint_path, from_meta=meta_init)
+        # load_fusion_checkpoint(model, checkpoint_path=checkpoint_path, from_meta=meta_init)
+
+
+        # if meta_init:
+        #     if not fp8:
+        #         model = model.to(dtype=target_dtype)
+        #     model = model.to(device=device if not self.cpu_offload else "cpu").eval()
+        #     model.set_rope_params()
+        # self.model = model
+        # Check for a finetuned checkpoint override; if provided, use it instead
+        finetuned_ckpt = config.get("finetuned_checkpoint", None)
+        if finetuned_ckpt and os.path.exists(finetuned_ckpt):
+            logging.info(f"Loading FINETUNED checkpoint: {finetuned_ckpt}")
+            load_fusion_checkpoint(model, checkpoint_path=finetuned_ckpt, from_meta=meta_init)
+        else:
+            load_fusion_checkpoint(model, checkpoint_path=checkpoint_path, from_meta=meta_init)
 
         if meta_init:
             if not fp8:
@@ -117,6 +132,7 @@ class OviFusionEngine:
             model = model.to(device=device if not self.cpu_offload else "cpu").eval()
             model.set_rope_params()
         self.model = model
+        
         if int8:
             quantize(self.model, qint8)
             freeze(self.model)
