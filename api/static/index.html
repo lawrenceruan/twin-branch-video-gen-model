@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ovi Studio — Video Generation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════ HEADER ═══════════════════════ -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="16" cy="16" r="14" stroke="url(#lg1)" stroke-width="2"/>
+          <path d="M11 10.5L23 16L11 21.5V10.5Z" fill="url(#lg2)"/>
+          <defs>
+            <linearGradient id="lg1" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#a78bfa"/>
+              <stop offset="1" stop-color="#38bdf8"/>
+            </linearGradient>
+            <linearGradient id="lg2" x1="11" y1="10" x2="23" y2="22" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#a78bfa"/>
+              <stop offset="1" stop-color="#38bdf8"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <span class="logo-text">Ovi<span class="logo-accent">Studio</span></span>
+    </div>
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="prepare">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 6a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2zm0 6a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z"/></svg>
+        Prepare Data
+      </button>
+      <button class="tab-btn" data-tab="train">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z"/></svg>
+        Train
+      </button>
+      <button class="tab-btn" data-tab="inference">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zm12.553 1.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"/></svg>
+        Inference
+      </button>
+      <button class="tab-btn" data-tab="gallery">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/></svg>
+        Gallery
+      </button>
+    </nav>
+    <div class="header-badge">v2.0</div>
+  </div>
+</header>
+
+<!-- ═══════════════════════ MAIN ═══════════════════════ -->
+<main class="main">
+
+  <!-- ─── toast container ─── -->
+  <div id="toast-container"></div>
+
+  <!-- ────────────────────────────────────────────────────
+       TAB: PREPARE DATA
+  ──────────────────────────────────────────────────── -->
+  <section id="tab-prepare" class="tab-panel active">
+    <div class="panel-header">
+      <div class="panel-title-group">
+        <h2>Prepare Training Data</h2>
+        <p class="panel-desc">Encode raw videos into latent tensors using the Ovi VAE pipeline. Each input video + JSONL manifest is processed into <code>.pt</code> files ready for fine-tuning.</p>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="form-card">
+        <h3 class="card-title"><span class="card-num">01</span> Source</h3>
+        <div class="field">
+          <label>Input Manifest <span class="required">*</span></label>
+          <div class="input-hint">Path to <code>.jsonl</code> file where each line contains <code>{"video_path":…, "text_prompt":…}</code></div>
+          <input type="text" id="prep-manifest" class="text-input" placeholder="training_data/raw_manifest.jsonl" />
+        </div>
+        <div class="field">
+          <label>Output Directory</label>
+          <input type="text" id="prep-output" class="text-input" placeholder="training_data" />
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h3 class="card-title"><span class="card-num">02</span> Model</h3>
+        <div class="field">
+          <label>Checkpoint Directory</label>
+          <input type="text" id="prep-ckpt" class="text-input" placeholder="./ckpts" />
+        </div>
+        <div class="field">
+          <label>Model Name</label>
+          <select id="prep-model" class="select-input">
+            <option value="720x720_5s">720×720 – 5s</option>
+            <option value="960x960_5s" selected>960×960 – 5s</option>
+            <option value="960x960_10s">960×960 – 10s</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>CUDA Device Index</label>
+          <input type="number" id="prep-device" class="text-input" value="0" min="0" />
+        </div>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn-primary" onclick="runPrepare()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+        Start Preparation
+      </button>
+    </div>
+
+    <div id="prepare-log-section" class="log-section hidden">
+      <div class="log-header">
+        <span class="log-title">Live Output</span>
+        <span id="prepare-status-badge" class="status-badge running">Running</span>
+        <button class="log-clear-btn" onclick="clearLog('prepare')">Clear</button>
+      </div>
+      <pre id="prepare-log" class="log-box"></pre>
+    </div>
+  </section>
+
+
+  <!-- ────────────────────────────────────────────────────
+       TAB: TRAIN
+  ──────────────────────────────────────────────────── -->
+  <section id="tab-train" class="tab-panel">
+    <div class="panel-header">
+      <div class="panel-title-group">
+        <h2>Fine-Tune Model</h2>
+        <p class="panel-desc">Run <code>train_v2.py</code> with full flow-matching training on your encoded latents. Supports fusion-only or full fine-tune modes.</p>
+      </div>
+    </div>
+
+    <div class="three-col">
+      <!-- Data & Model -->
+      <div class="form-card">
+        <h3 class="card-title"><span class="card-num">01</span> Data & Model</h3>
+        <div class="field">
+          <label>Data Manifest</label>
+          <input type="text" id="train-manifest" class="text-input" placeholder="training_data/manifest.jsonl" />
+        </div>
+        <div class="field">
+          <label>Checkpoint Directory</label>
+          <input type="text" id="train-ckpt" class="text-input" placeholder="./ckpts" />
+        </div>
+        <div class="field">
+          <label>Output Directory</label>
+          <input type="text" id="train-output" class="text-input" placeholder="./training_outputs" />
+        </div>
+        <div class="field">
+          <label>Model Name</label>
+          <select id="train-model" class="select-input">
+            <option value="720x720_5s">720×720 – 5s</option>
+            <option value="960x960_5s" selected>960×960 – 5s</option>
+            <option value="960x960_10s">960×960 – 10s</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Training Params -->
+      <div class="form-card">
+        <h3 class="card-title"><span class="card-num">02</span> Training</h3>
+        <div class="field">
+          <label>Max Steps</label>
+          <input type="number" id="train-steps" class="text-input" value="1000" min="1" />
+        </div>
+        <div class="field">
+          <label>Batch Size</label>
+          <input type="number" id="train-batch" class="text-input" value="1" min="1" />
+        </div>
+        <div class="field">
+          <label>Learning Rate</label>
+          <input type="text" id="train-lr" class="text-input" value="1e-5" />
+        </div>
+        <div class="field">
+          <label>Warmup Steps</label>
+          <input type="number" id="train-warmup" class="text-input" value="100" min="0" />
+        </div>
+        <div class="field">
+          <label>LR Scheduler</label>
+          <select id="train-scheduler" class="select-input">
+            <option value="cosine" selected>Cosine</option>
+            <option value="constant">Constant</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Gradient Accumulation Steps</label>
+          <input type="number" id="train-accum" class="text-input" value="1" min="1" />
+        </div>
+      </div>
+
+      <!-- Advanced -->
+      <div class="form-card">
+        <h3 class="card-title"><span class="card-num">03</span> Advanced</h3>
+        <div class="field">
+          <label>Fine-tune Mode</label>
+          <select id="train-mode" class="select-input">
+            <option value="fusion_only" selected>Fusion Only</option>
+            <option value="full">Full</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Mixed Precision</label>
+          <select id="train-precision" class="select-input">
+            <option value="bf16" selected>BF16</option>
+            <option value="fp32">FP32</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Save Every N Steps</label>
+          <input type="number" id="train-save" class="text-input" value="500" min="1" />
+        </div>
+        <div class="field">
+          <label>Log Every N Steps</label>
+          <input type="number" id="train-log" class="text-input" value="10" min="1" />
+        </div>
+        <div class="field toggle-field">
+          <label>Gradient Checkpointing</label>
+          <label class="toggle">
+            <input type="checkbox" id="train-gc" checked />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="field">
+          <label>Flow Shift</label>
+          <input type="number" id="train-shift" class="text-input" value="5.0" step="0.1" />
+        </div>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn-primary" onclick="runTrain()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"/></svg>
+        Start Training
+      </button>
+    </div>
+
+    <div id="train-log-section" class="log-section hidden">
+      <div class="log-header">
+        <span class="log-title">Live Output</span>
+        <span id="train-status-badge" class="status-badge running">Running</span>
+        <button class="log-clear-btn" onclick="clearLog('train')">Clear</button>
+      </div>
+      <pre id="train-log" class="log-box"></pre>
+    </div>
+  </section>
+
+
+  <!-- ────────────────────────────────────────────────────
+       TAB: INFERENCE
+  ──────────────────────────────────────────────────── -->
+  <section id="tab-inference" class="tab-panel">
+    <div class="panel-header">
+      <div class="panel-title-group">
+        <h2>Video Inference</h2>
+        <p class="panel-desc">Generate videos from text prompts or reference images using your fine-tuned (or base) Ovi model.</p>
+      </div>
+    </div>
+
+    <div class="three-col">
+      <!-- Prompt & Mode -->
+      <div class="form-card span-2">
+        <h3 class="card-title"><span class="card-num">01</span> Prompt</h3>
+        <div class="field">
+          <label>Generation Mode</label>
+          <div class="segmented" id="infer-mode-group">
+            <button class="seg-btn active" data-value="t2v" onclick="setMode(this)">T2V</button>
+            <button class="seg-btn" data-value="i2v" onclick="setMode(this)">I2V</button>
+            <button class="seg-btn" data-value="t2i2v" onclick="setMode(this)">T2I2V</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Text Prompt <span class="required">*</span></label>
+          <textarea id="infer-prompt" class="text-input textarea" rows="3" placeholder="A cinematic close-up of a woman walking through a neon-lit street at night..."></textarea>
+        </div>
+        <div class="field" id="image-upload-field">
+          <label>Reference Image <span class="badge-optional">I2V only</span></label>
+          <div class="upload-zone" id="upload-zone" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
+            <input type="file" id="image-file-input" accept="image/*" onchange="handleFileSelect(event)" style="display:none" />
+            <div class="upload-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 3.75h18A2.25 2.25 0 0123.25 6v12A2.25 2.25 0 0121 20.25H3A2.25 2.25 0 01.75 18V6A2.25 2.25 0 013 3.75z"/></svg>
+            </div>
+            <p class="upload-text">Drop image here or <span class="upload-link" onclick="document.getElementById('image-file-input').click()">browse</span></p>
+            <p class="upload-hint">PNG, JPG, WebP supported</p>
+            <div id="upload-preview" class="upload-preview hidden"></div>
+          </div>
+          <div id="uploaded-path" class="uploaded-path hidden"></div>
+        </div>
+        <div class="field">
+          <label>Negative Prompt (Video)</label>
+          <input type="text" id="infer-neg-video" class="text-input" value="jitter, bad hands, blur, distortion" />
+        </div>
+        <div class="field">
+          <label>Negative Prompt (Audio)</label>
+          <input type="text" id="infer-neg-audio" class="text-input" value="robotic, muffled, echo, distorted" />
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div class="form-card">
+        <h3 class="card-title"><span class="card-num">02</span> Settings</h3>
+        <div class="field">
+          <label>Model Name</label>
+          <select id="infer-model" class="select-input">
+            <option value="720x720_5s" selected>720×720 – 5s</option>
+            <option value="960x960_5s">960×960 – 5s</option>
+            <option value="960x960_10s">960×960 – 10s</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Resolution</label>
+          <select id="infer-res" class="select-input">
+            <option value="704,1280" selected>704 × 1280</option>
+            <option value="1280,704">1280 × 704</option>
+            <option value="960,960">960 × 960</option>
+            <option value="720,720">720 × 720</option>
+            <option value="512,992">512 × 992</option>
+            <option value="992,512">992 × 512</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Sample Steps</label>
+          <input type="number" id="infer-steps" class="text-input" value="50" min="10" max="100" />
+        </div>
+        <div class="field">
+          <label>Video Guidance Scale</label>
+          <div class="slider-group">
+            <input type="range" id="infer-vid-cfg" min="1" max="10" step="0.5" value="4" oninput="document.getElementById('infer-vid-cfg-val').textContent=this.value" />
+            <span class="slider-val" id="infer-vid-cfg-val">4</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Audio Guidance Scale</label>
+          <div class="slider-group">
+            <input type="range" id="infer-aud-cfg" min="1" max="10" step="0.5" value="3" oninput="document.getElementById('infer-aud-cfg-val').textContent=this.value" />
+            <span class="slider-val" id="infer-aud-cfg-val">3</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Seed</label>
+          <input type="number" id="infer-seed" class="text-input" value="103" />
+        </div>
+        <div class="field">
+          <label>Checkpoint Dir</label>
+          <input type="text" id="infer-ckpt" class="text-input" placeholder="./ckpts" />
+        </div>
+        <div class="field">
+          <label>Fine-tuned Checkpoint <span class="badge-optional">optional</span></label>
+          <input type="text" id="infer-ft-ckpt" class="text-input" placeholder="./training_outputs/checkpoint_final.pt" />
+        </div>
+        <div class="field">
+          <label>Output Directory</label>
+          <input type="text" id="infer-output" class="text-input" placeholder="./outputs" />
+        </div>
+        <div class="field toggle-field">
+          <label>CPU Offload</label>
+          <label class="toggle">
+            <input type="checkbox" id="infer-cpu-offload" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn-primary" onclick="runInference()">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+        Generate Video
+      </button>
+      <button class="btn btn-secondary" onclick="switchTab('gallery')">
+        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/></svg>
+        View Gallery
+      </button>
+    </div>
+
+    <div id="inference-log-section" class="log-section hidden">
+      <div class="log-header">
+        <span class="log-title">Live Output</span>
+        <span id="inference-status-badge" class="status-badge running">Running</span>
+        <button class="log-clear-btn" onclick="clearLog('inference')">Clear</button>
+      </div>
+      <pre id="inference-log" class="log-box"></pre>
+    </div>
+  </section>
+
+
+  <!-- ────────────────────────────────────────────────────
+       TAB: GALLERY
+  ──────────────────────────────────────────────────── -->
+  <section id="tab-gallery" class="tab-panel">
+    <div class="panel-header">
+      <div class="panel-title-group">
+        <h2>Output Gallery</h2>
+        <p class="panel-desc">Browse and preview all generated videos from your inference runs.</p>
+      </div>
+      <div class="gallery-controls">
+        <input type="text" id="gallery-dir" class="text-input gallery-dir-input" placeholder="outputs" value="outputs" />
+        <button class="btn btn-secondary btn-sm" onclick="loadGallery()">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/></svg>
+          Refresh
+        </button>
+      </div>
+    </div>
+
+    <div id="gallery-empty" class="gallery-empty hidden">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
+      <p>No videos found in this directory.</p>
+      <small>Run an inference job first, or check the output path.</small>
+    </div>
+
+    <div id="gallery-grid" class="gallery-grid"></div>
+
+    <!-- Video lightbox -->
+    <div id="lightbox" class="lightbox hidden" onclick="closeLightbox(event)">
+      <div class="lightbox-inner">
+        <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+        <video id="lightbox-video" controls autoplay class="lightbox-video"></video>
+        <p id="lightbox-title" class="lightbox-title"></p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+<footer class="footer">
+  <p>Ovi Studio — Twin-Branch AV Video Generation</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Ovi FusionModel Fine-tuning Config  (train_v2.py)
+# ──────────────────────────────────────────────────────────────────────────────
+
+model_name: "960x960_5s"       # ["720x720_5s", "960x960_5s", "960x960_10s"]
+ckpt_dir:   "./ckpts"
+output_dir: "./training_outputs"
+
+data_manifest: "training_data/manifest.jsonl"
+
+mixed_precision: "bf16"        # "bf16" | "fp32"
+
+# ── Fine-tune strategy ────────────────────────────────────────────────────────
+finetune:
+  mode: "fusion_only"          # "fusion_only" | "full"
+  gradient_checkpointing: true
+
+# ── Training hyper-parameters ─────────────────────────────────────────────────
+training:
+  seed: 42
+  batch_size: 1
+  max_steps: 1000
+  learning_rate: 1.0e-5
+  weight_decay: 0.01
+  warmup_steps: 100
+  lr_scheduler: "cosine"       # "cosine" | "constant"
+  gradient_accumulation_steps: 1
+  max_grad_norm: 1.0
+  save_every: 500
+  log_every: 10
+
+# ── Data loading ──────────────────────────────────────────────────────────────
+data:
+  num_workers: 4
+  pin_memory: true
+
+# ── Flow-matching ─────────────────────────────────────────────────────────────
+flow:
+  shift: 5.0
+  cfg_drop_rate: 0.1
+
+# ── Loss weighting ────────────────────────────────────────────────────────────
+loss:
+  video_weight: 1.0
+  audio_weight: 1.0
