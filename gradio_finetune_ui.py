@@ -400,9 +400,7 @@ def build_ui() -> gr.Blocks:
 
         gr.Markdown(
             """# 🎬 Ovi Fine-tuning & Inference UI
-A three-step workflow: **📋 Prepare Data → 🏋️ Fine-tune → 🎬 Infer**.  
-All original scripts (`prepare_training_data_v2.py`, `train_v2.py`, `inference.py`) are
-unchanged — this file only adds a new UI wrapper."""
+A three-step workflow: **📋 Prepare Data → 🏋️ Fine-tune → 🎬 Infer**.  """
         )
 
         with gr.Tabs():
